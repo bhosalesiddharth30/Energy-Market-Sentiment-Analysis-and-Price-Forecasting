@@ -80,13 +80,11 @@ It predicts **next-day electricity price changes** (`ΔPrice`) using **FinBERT-b
    ```bash
    git clone https://github.com/bhosalesiddharth30/Energy-Market-Sentiment-Analysis-and-Price-Forecasting.git
    cd Energy-Market-Sentiment-Analysis-and-Price-Forecasting
-Create and activate a virtual environment
-
-bash
-Copy code
+# Create and activate a virtual environment
 python -m venv .venv
-.\.venv\Scripts\activate    # on Windows
-# source .venv/bin/activate # on Linux/Mac
+.venv\Scripts\activate    # on Windows
+# source .venv/bin/activate  # on Linux/Mac
+
 Install dependencies
 
 bash
