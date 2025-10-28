@@ -56,33 +56,39 @@ X_t = [mean\_sent_{t-k}, load\_z_t, dprice\_vol\_{10,t}, ttf\_d1_t]
 ---
 
 ## 🧠 How to Run
-
-### 1️⃣ Clone the repository
-```bash
+🧠 How to Run
+1️⃣ Clone the repository
 git clone https://github.com/bhosalesiddharth30/Energy-Market-Sentiment-Analysis-and-Price-Forecasting.git
 cd Energy-Market-Sentiment-Analysis-and-Price-Forecasting
+
 2️⃣ Create and activate a virtual environment
-bash
-Copy code
-# On Windows
+
+On Windows:
+
 python -m venv .venv
 .venv\Scripts\activate
 
-# On Linux/Mac
+
+On Linux/Mac:
+
+python3 -m venv .venv
 source .venv/bin/activate
+
 3️⃣ Install dependencies
-bash
-Copy code
 pip install -r requirements.txt
+
 4️⃣ Run the notebook
-bash
-Copy code
 jupyter notebook notebooks/energy_sentiment_analysis.ipynb
-🧩 Tech Stack
+
+🧠 Tech Stack
+
 Language: Python 3.10+
+
 Libraries: pandas, numpy, matplotlib, seaborn, scikit-learn, xgboost, torch, transformers (FinBERT), yfinance, tqdm
+
 Tools: Jupyter Notebook, VS Code
-Data: EPEX Spot (OPSD), TTF gas prices, energy news feeds
+
+Data Sources: EPEX Spot (OPSD), TTF gas prices, energy news feeds
 
 📊 Example Backtest Result (Simulated)
 Metric	Buy & Hold	Strategy
