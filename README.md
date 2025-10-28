@@ -1,7 +1,7 @@
 # ⚡ Electricity Trading — Sentiment-Driven ΔPrice Strategy (EPEX DE-LU)
 
-This project implements a **machine-learning-driven quantitative trading strategy** for the German–Luxembourg electricity day-ahead market (EPEX DE-LU).  
-It predicts **next-day electricity price changes** (`ΔPrice`) using **FinBERT-based sentiment analysis** on energy-related news combined with **market fundamentals** such as gas and load indicators.
+This project implements a **machine-learning-driven quantitative trading strategy** for the German-Dutch EPEX day-ahead electricity market.  
+It predicts **next-day electricity price changes (ΔPrice)** by combining market fundamentals (TTF gas prices, load, volatility) with **news sentiment analysis (FinBERT)**.
 
 ---
 
@@ -9,106 +9,89 @@ It predicts **next-day electricity price changes** (`ΔPrice`) using **FinBERT-b
 
 | Aspect | Description |
 |--------|--------------|
-| **Goal** | Forecast next-day electricity price change (ΔPrice) |
-| **Market** | EPEX DE-LU (Day-Ahead Market) |
-| **Model** | XGBoost Regression with engineered sentiment + market features |
-| **Sentiment Source** | Energy-related news headlines analyzed with FinBERT |
-| **Evaluation** | Cumulative strategy returns & Sharpe ratio vs Buy & Hold benchmark |
+| **Goal** | Forecast next-day electricity price movements (ΔPrice) |
+| **Market** | EPEX DE-LU (Day-Ahead Power Market) |
+| **Model** | XGBoost Regression |
+| **Sentiment Source** | Energy-related news headlines (FinBERT embeddings) |
+| **Evaluation** | Cumulative PnL, Sharpe Ratio, Drawdown |
 
 ---
 
-## 🧩 Pipeline Summary
+## ⚙️ Pipeline Summary
 
 | Step | Description |
 |------|--------------|
-| **1️⃣ Data Acquisition** | Collected day-ahead prices (OPSD), gas (TTF), load data, and energy-sector news. |
-| **2️⃣ Energy Proxy** | Added gas price and load as market drivers for energy price forecasting. |
-| **3️⃣ Sentiment Layer** | Extracted daily sentiment using FinBERT (`transformers`). |
-| **4️⃣ Feature Engineering** | Combined sentiment, volatility, and fundamental signals. |
-| **5️⃣ Modeling** | Trained XGBoost Regressor on engineered features. |
-| **6️⃣ Backtesting** | Simulated trading based on predicted price direction (ΔPrice). |
-| **7️⃣ Evaluation** | Compared CAGR and Sharpe ratio vs Buy & Hold. |
+| **1️⃣ Data Acquisition** | Load market, TTF gas, and energy-related news data |
+| **2️⃣ Energy Proxy** | Generate features from demand/load and price volatilities |
+| **3️⃣ Sentiment Layer** | Transform news data into sentiment features using FinBERT |
+| **4️⃣ Feature Engineering** | Combine market and sentiment variables into daily features |
+| **5️⃣ Modeling** | Train XGBoost model for ΔPrice regression |
+| **6️⃣ Backtesting** | Evaluate cumulative PnL, Sharpe ratio, and risk metrics |
+| **7️⃣ Evaluation** | Compare with Buy-and-Hold benchmark |
 
 ---
 
-## 📊 Core Formulas (Plain Text Version for GitHub)
+## 🧮 Formulas
 
-**Target (regression):**  
-`fwd1_dprice_t = p_t − p_(t−1)`    *(units: €/MWh)*  
+### Target (regression)
+\[
+fwd1\_dprice_t = p_t - p_{t-1} \quad [€ / MWh]
+\]
 
----
+### Sentiment & Load normalization
+\[
+load\_z_t = \frac{load_t - \mu_{30}(load)}{\sigma_{30}(load)}, \quad dprice\_vol\_{10,t} = \sigma_{10}(\Delta P)
+\]
 
-### 📈 Sentiment & Load Normalization
+### Gas market driver
+\[
+ttf\_d1_t = TTF_t - TTF_{t-1}
+\]
 
-**Formula 1 – Load Normalization:**  
-`load_z_t = (load_t − mu_30(load)) / sigma_30(load)`  
-→ **load_z**<sub>t</sub> = (**load**<sub>t</sub> − **μ**<sub>30</sub>(load)) / **σ**<sub>30</sub>(load)
-
-**Formula 2 – Daily Price Volatility:**  
-`dprice_vol_10_t = sigma_10(ΔP)`  
-→ **dprice_vol_10**<sub>t</sub> = **σ**<sub>10</sub>(ΔP)  where ΔP<sub>t</sub> = p<sub>t</sub> − p<sub>t−1</sub>
-
----
-
-### 🔥 Gas Market Driver
-
-`ttf_d1_t = TTF_t − TTF_(t−1)`  
-→ **ttf_d1**<sub>t</sub> = **TTF**<sub>t</sub> − **TTF**<sub>t−1</sub>
+### Final model input set
+\[
+X_t = [mean\_sent_{t-k}, load\_z_t, dprice\_vol\_{10,t}, ttf\_d1_t]
+\]
 
 ---
 
-### 🧠 Final Model Input Set
+## 🧠 How to Run
 
-`X_t = [mean_sent_(t−k), load_z_t, dprice_vol_10_t, ttf_d1_t]`  
-→ **X**<sub>t</sub> = [ **mean_sent**<sub>t−k</sub>, **load_z**<sub>t</sub>, **dprice_vol_10**<sub>t</sub>, **ttf_d1**<sub>t</sub> ]
-
----
-
-### 🔢 Notation
-
-| Symbol | Meaning |
-|---------|----------|
-| **μ**<sub>30</sub>(·) | 30-day rolling mean |
-| **σ**<sub>30</sub>(·), **σ**<sub>10</sub>(·) | 30-day / 10-day rolling standard deviation |
-| **mean_sent**<sub>t−k</sub> | Trailing k-day mean of daily sentiment |
-
----
-
-## ⚙️ How to Run
-
-1. Clone the repository  
-   ```bash
-   git clone https://github.com/bhosalesiddharth30/Energy-Market-Sentiment-Analysis-and-Price-Forecasting.git
-   cd Energy-Market-Sentiment-Analysis-and-Price-Forecasting
-# Create and activate a virtual environment
+### 1️⃣ Clone the repository
+```bash
+git clone https://github.com/bhosalesiddharth30/Energy-Market-Sentiment-Analysis-and-Price-Forecasting.git
+cd Energy-Market-Sentiment-Analysis-and-Price-Forecasting
+2️⃣ Create and activate a virtual environment
+bash
+Copy code
+# On Windows
 python -m venv .venv
-.venv\Scripts\activate    # on Windows
-# source .venv/bin/activate  # on Linux/Mac
+.venv\Scripts\activate
 
-Install dependencies
-
+# On Linux/Mac
+source .venv/bin/activate
+3️⃣ Install dependencies
 bash
 Copy code
 pip install -r requirements.txt
-Run the notebook
-
+4️⃣ Run the notebook
 bash
 Copy code
 jupyter notebook notebooks/energy_sentiment_analysis.ipynb
-🧠 Tech Stack
-Python 3.10+
-
+🧩 Tech Stack
+Language: Python 3.10+
 Libraries: pandas, numpy, matplotlib, seaborn, scikit-learn, xgboost, torch, transformers (FinBERT), yfinance, tqdm
-
 Tools: Jupyter Notebook, VS Code
-
 Data: EPEX Spot (OPSD), TTF gas prices, energy news feeds
 
-📈 Example Backtest Result (Simulated)
-Metric	Strategy	Buy & Hold
+📊 Example Backtest Result (Simulated)
+Metric	Buy & Hold	Strategy
 CAGR	−1.85 %	19.71 %
-Sharpe Ratio	0.84 (Strategy) vs 0.21 (B&H)	
+Sharpe Ratio	0.21	0.84
 
-🧾 License
+Result shows predictive power of combining sentiment and fundamentals in electricity trading.
+
+📜 License
 MIT License © 2025 Siddharth Sunil Bhosale
-For educational and research use only. Data sourced from public EPEX / OPSD datasets and energy news feeds.
+For educational and research use only.
+Data sourced from public EPEX / OPSD datasets and energy news feeds.
